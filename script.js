@@ -1,7 +1,13 @@
-// python -m http.server
-let animalPopulation=0;
-let allAnimals=[];
+let animalPopulation = 0;
+let allAnimals = [];
+var foodLog = "";
+const animals = document.getElementById("animals");
+window.addEventListener("load", run);
 document.getElementById("newAnimal").addEventListener("click", createAnimal);
+document.getElementById("feed").addEventListener("click", feedAnimals);
+document.getElementById("delete").addEventListener("click", deleteAnimal);
+document.getElementById("newName").addEventListener("click", changeName);
+
 function run() {
     let tigger=new Tiger("Tigger");
     let pooh=new Bear("Pooh");
@@ -9,7 +15,10 @@ function run() {
     let gemma=new Giraffe("Gemma");
     let stinger=new Bee("Stinger");
     allAnimals.push(tigger,pooh,rarity,gemma,stinger);
-    
+    listAnimals();
+    for (let i=0; i<5; i++) {
+        animals.options[animals.options.length] = new Option(allAnimals[i].name,(i));
+    }
     
     
 
@@ -18,9 +27,10 @@ function run() {
 
 class Animal {
 
-    constructor(name,favoriteFood) {
+    constructor(name,favoriteFood,species) {
         this.name=name;
         this.favoriteFood=favoriteFood;
+        this.species=species;
         animalPopulation++;
     }
     
@@ -29,13 +39,13 @@ class Animal {
     }
     
     sleep() {
-        console.log(this.name + " sleeps for 8 hours");
+        foodLog+=this.name + " sleeps for 8 hours"+". ";
     }
 
     eat(food) {
-        console.log(this.name+" eats "+food);
+        foodLog+=this.name+" eats "+food+". ";
         if(food==this.favoriteFood) {
-            console.log("YUM!!! "+this.name+" wants more "+food);
+            foodLog+="YUM!!! "+this.name+" wants more "+food+". ";
         } else {
             this.sleep(this.name);
         }
@@ -45,7 +55,7 @@ class Animal {
 class Tiger extends Animal {
 
     constructor(name) {
-        super(name,"meat");
+        super(name,"meat","Tiger");
     }
 
     
@@ -53,28 +63,28 @@ class Tiger extends Animal {
 
 class Bear extends Animal {
     constructor(name) {
-        super(name,"fish");
+        super(name,"fish","Bear");
     }
     
     sleep() {
-        console.log(this.name + " hibernates for 4 months");
+        foodLog+=this.name + " hibernates for 4 months"+". ";
     }
     
 }
 
 class Unicorn extends Animal {
     constructor(name) {
-        super(name,"marshmallows");
+        super(name,"marshmallows","Unicorn");
     }
     
     sleep() {
-        console.log(this.name+" sleeps in a cloud");
+        foodLog+=this.name+" sleeps in a cloud"+". ";
     }
 }
 
 class Giraffe extends Animal {
     constructor(name) {
-        super(name,"leaves");
+        super(name,"leaves","Giraffe");
     }
     
     eat(food) {
@@ -82,14 +92,14 @@ class Giraffe extends Animal {
             super.eat(food);
             super.sleep();
         } else {
-            console.log("YUCK!!! "+this.name +" will not eat "+food);
+            foodLog+="YUCK!!! "+this.name +" will not eat "+food+". ";
         }
     }
 }
 
 class Bee extends Animal {
     constructor(name) {
-        super(name,"pollen");
+        super(name,"pollen","Bee");
     }
     
     eat(food) {
@@ -97,12 +107,12 @@ class Bee extends Animal {
             super.eat(food);
             this.sleep();
         } else {
-            console.log("YUCK!!! "+this.name +" will not eat "+food);
+            foodLog+="YUCK!!! "+this.name +" will not eat "+food+". ";
         }
     }
     
     sleep() {
-        console.log(this.name+" never sleeps");
+        foodLog+=this.name+" never sleeps"+". ";
     }
 }
 
@@ -110,20 +120,64 @@ class Bee extends Animal {
 
 
 function createAnimal() {
-    let sub=animal(document.getElementById("animal").getValue);
+    let name = document.getElementById("name").value;
+    let temp;
+    let val = document.getElementById("animal").value;
+    
+    if (val==1) {
+        temp = new Tiger(name);
+    } else if(val==2) {
+        temp = new Bear(name);
+    } else if(val==3) {
+        temp = new Unicorn(name);
+    } else if(val==4) {
+        temp = new Giraffe(name);
+    } else if (val==5) {
+        temp = new Bee(name);
+    }
+    allAnimals.push(temp);
+    animals.options[animals.options.length] = new Option(name,animalPopulation-1);
+    listAnimals();
 }
 
 
-
-class Zookeeper {
-    constructor(name) {
-        this.name=name;
-    }
+function feedAnimals() {
+    foodLog="";
+    let food = document.getElementById("food").value;
     
-    feedAnimals(animals,food) {
-        console.log(this.name+" is feeding "+food+" to "+animals.length+" of "+animalPopulation+" total animals");
-        for (let i=0; i<animals.length; i++) {
-            animals[i].eat(food);
-        }
+    for (let i=0; i<allAnimals.length; i++) {
+        allAnimals[i].eat(food);
     }
+    document.getElementById("foodLog").innerHTML=foodLog;
+}
+
+function listAnimals() {
+    tempStr=""
+    for(let i=0; i<allAnimals.length; i++) {
+        tempStr+=allAnimals[i].species+": "+allAnimals[i].name+", ";
+    }
+    document.getElementById("animalList").innerHTML=tempStr;
+}
+
+function deleteAnimal() {
+    animalPopulation--;
+    let index = animals.value;
+    allAnimals.splice(index,1);
+
+    while (animals.options.length>0) {
+        animals.remove(0);
+    }
+    for (let i=0; i<allAnimals.length; i++){
+        animals.options[animals.options.length] = new Option(allAnimals[i].name,i);
+    }
+    listAnimals();
+}
+
+function changeName() {
+    let index = animals.value;
+    let name = document.getElementById("new").value;
+    allAnimals[index].name=name;
+    console.log(index+" "+name)
+    animals.options[index]=new Option(name,index);
+    listAnimals();
 }
